@@ -20,9 +20,22 @@ void PID::UpdateError(double cte) {
     d_error = cte - p_error;
     p_error = cte;
     i_error += cte;    
+
+    // update error tracking
+    sumCTESqrError += pow(cte, 2);
+    numCTECount += 1;
 }
 
 double PID::TotalError() {
     return -Kp*p_error - Kd*d_error - Ki*i_error; 
+}
+
+double PID::GetError() {
+    return sqrt(sumCTESqrError / numCTECount);
+}
+
+void PID::ResetError() {
+    sumCTESqrError = 0.0;
+    numCTECount = 0.0;
 }
 

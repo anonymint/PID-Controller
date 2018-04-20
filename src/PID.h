@@ -1,6 +1,9 @@
 #ifndef PID_H
 #define PID_H
 
+#include <iostream>
+#include <random>
+
 class PID {
 public:
   /*
@@ -16,6 +19,12 @@ public:
   double Kp;
   double Ki;
   double Kd;
+
+  /*
+  * Helper variables
+  */
+  double sumCTESqrError;
+  double numCTECount;
 
   /*
   * Constructor
@@ -41,6 +50,16 @@ public:
   * Calculate the total PID error.
   */
   double TotalError();
+
+  /*
+  * get Error 
+  */
+  double GetError();
+
+  /*
+  * reset Error
+  */
+  void ResetError();
 };
 
 #endif /* PID_H */
