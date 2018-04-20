@@ -28,14 +28,14 @@ std::string hasData(std::string s) {
   return "";
 }
 
-int main()
+int main(int argc, char *argv[])
 {
   uWS::Hub h;
 
   PID pid;
-  double Kp = 0.20;
-  double Ki = 0.001;
-  double Kd = 2.45;
+  double Kp = atof(argv[1]);//0.175;
+  double Ki = atof(argv[2]);//0.002;
+  double Kd = atof(argv[3]);//3.00;
   pid.Init(Kp, Ki, Kd);
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
@@ -62,6 +62,11 @@ int main()
           */
          pid.UpdateError(cte);
          steer_value = pid.TotalError();
+         if (steer_value > 1) {
+           steer_value = 1;
+         } else if (steer_value < -1) {
+           steer_value = -1;
+         }
           
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
