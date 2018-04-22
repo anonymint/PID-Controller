@@ -23,8 +23,22 @@ public:
   /*
   * Helper variables
   */
+  bool enabledTwiddle = false;
+  int counter;
+  int counterReset;
+  int iterationCount;
+  std::vector<double> K;
+  std::vector<double> dK;
   double sumCTESqrError;
   double numCTECount;
+  bool initialTwiddle;
+  double startErr;
+  double bestErr;
+  double bestKp;
+  double bestKi;
+  double bestKd;
+  int counterJ;
+  int caseCon;
 
   /*
   * Constructor
@@ -60,6 +74,11 @@ public:
   * reset Error
   */
   void ResetError();
+
+  /*
+  * Twiddle
+  */
+  void Twiddle();
 };
 
 #endif /* PID_H */
