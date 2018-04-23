@@ -53,5 +53,9 @@ The result after hours of the run and adjust itself, I can see the result as men
 
 ## Result
 
-[Result of driving a lap in 40m/h](./asset/Drive_result_40m.mp4)
+![Run 1](./asset/run_1.gif)
+![Run 1](./asset/run_2.gif)
+![Run 1](./asset/run_3.gif)
+
+[Result of full video of driving a lap in 40m/h](./asset/Drive_result_40m.mp4)
 
