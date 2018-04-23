@@ -28,26 +28,17 @@ std::string hasData(std::string s) {
   return "";
 }
 
-int main(int argc, char *argv[])
-{
-  uWS::Hub h;
-
-  PID pid;
-  double Kp = atof(argv[1]);//0.175;
-  double Ki = atof(argv[2]);//0.002;
-  double Kd = atof(argv[3]);//3.00;
-  pid.Init(Kp, Ki, Kd);
-
+void run(uWS::Hub &h, PID &pid) {
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
-    // The 2 signifies a websocket event
+    // The 2 signifies a websocket event    
     if (length && length > 2 && data[0] == '4' && data[1] == '2')
     {
-      auto s = hasData(std::string(data).substr(0, length));
+      auto s = hasData(std::string(data).substr(0, length));      
       if (s != "") {
         auto j = json::parse(s);
-        std::string event = j[0].get<std::string>();
+        std::string event = j[0].get<std::string>();        
         if (event == "telemetry") {
           // j[1] is the data JSON object
           double cte = std::stod(j[1]["cte"].get<std::string>());
@@ -67,14 +58,23 @@ int main(int argc, char *argv[])
          } else if (steer_value < -1) {
            steer_value = -1;
          }
+
+         pid.counter += 1;
           
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
+          msgJson["throttle"] = 0.4;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
+          // std::cout << pid.Kp << " " << pid.Ki << " " << pid.Kd << "E:"<< pid.GetError() << std::endl;
+          // std::cout << "Best PID:" << pid.bestKp << " " << pid.bestKi << " " << pid.bestKd << std::endl;
+          if (pid.enabledTwiddle && (pid.counter >= pid.counterReset || pid.GetError() > 2)) {                        
+            pid.Twiddle();
+            msg = "42[\"reset\",{}]";
+            pid.counter = 0; 
+          }
           std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
@@ -85,6 +85,44 @@ int main(int argc, char *argv[])
       }
     }
   });
+}
+
+int main(int argc, char *argv[])
+{
+  uWS::Hub h;
+
+  PID pid;
+
+  double Kp = 0.175;
+  double Ki = 0.00156953;
+  double Kd = 2.28;
+  if (argc == 4) {
+    Kp = atof(argv[1]);
+    Ki = atof(argv[2]);
+    Kd = atof(argv[3]);
+  }
+  //1.33093 0.0011 4.4328E:0.271493
+  //Start Err:0.351834 End Err:0.271493
+  //Best PID:0.175 0.00156953 2.28
+  /*
+  * Turn Twiddle on by setting enabledTwiddle to true
+  * ************************************************
+  */
+  pid.enabledTwiddle = false;
+  pid.counter = 0;
+  pid.counterReset = 2000;
+  pid.iterationCount = 20;
+  pid.K = {Kp, Ki, Kd};
+  pid.dK = {0.3, 0.001, 0.3};
+  /*
+  * ************************************************
+  */
+
+  // Init PID
+  pid.Init(Kp, Ki, Kd);
+  
+  // onMessage
+  run(h, pid);  
 
   // We don't need this since we're not using HTTP but if it's removed the program
   // doesn't compile :-(

@@ -1,6 +1,9 @@
 #ifndef PID_H
 #define PID_H
 
+#include <iostream>
+#include <random>
+
 class PID {
 public:
   /*
@@ -16,6 +19,26 @@ public:
   double Kp;
   double Ki;
   double Kd;
+
+  /*
+  * Helper variables
+  */
+  bool enabledTwiddle = false;
+  int counter;
+  int counterReset;
+  int iterationCount;
+  std::vector<double> K;
+  std::vector<double> dK;
+  double sumCTESqrError;
+  double numCTECount;
+  bool initialTwiddle;
+  double startErr;
+  double bestErr;
+  double bestKp;
+  double bestKi;
+  double bestKd;
+  int counterJ;
+  int caseCon;
 
   /*
   * Constructor
@@ -41,6 +64,21 @@ public:
   * Calculate the total PID error.
   */
   double TotalError();
+
+  /*
+  * get Error 
+  */
+  double GetError();
+
+  /*
+  * reset Error
+  */
+  void ResetError();
+
+  /*
+  * Twiddle
+  */
+  void Twiddle();
 };
 
 #endif /* PID_H */
